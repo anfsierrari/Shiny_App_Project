@@ -1,0 +1,57 @@
+---
+title: "Predicting Iris species"
+author: "Andrés Sierra-Ricaurte"
+date: "13/9/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## The database
+I wanted to make and app where the user can select the values for some flower measurements and the app returns a predicted species.
+
+For this task I fit two models with the Iris dataset available in R. Here the first values:
+
+```{r, echo=FALSE, comment=""}
+head(iris)
+```
+
+## The Plots
+I provided to the user a visualization of the data, because it is important to have in mind how is the data distributed. I also add a purple point for the values selected by the user in the sidebar panel.
+```{r}
+library(ggplot2)
+p <- ggplot(data=iris, aes(x=Petal.Width, y=Petal.Length, color=Species))
+p + geom_point() + geom_point(aes(x=1, y=3), color="purple", size=3) + theme_bw()
+```
+
+## Random Forest
+Using the `caret` package and creating data partition (p=0.7) for training and testing datasets, I fitted a random forest model and predict the species for the measures selected by the user.
+I also provided the accuracy of the model when predicting the testing dataset:
+
+```{r, comment="", warning=FALSE, message=FALSE}
+library(caret)
+my_data <- iris[,3:5]
+inTrain <- createDataPartition(y=my_data$Species, p=0.7, list=F)
+    training <- my_data[inTrain, ]
+    testing <- my_data[-inTrain, ]
+    model1 <- train(Species~., data=training, method="rf")
+    a <- confusionMatrix(testing$Species, predict(model1, testing[,-3]))
+    a$overall
+```
+
+## Linear discriminant analysis
+Using the `caret` package and creating data partition (p=0.7) for training and testing datasets, I fitted a linear discriminant analysis (lda) model and predict the species for the measures selected by the user.
+I also provided the accuracy of the model when predicting the testing dataset:
+
+```{r, comment="", warning=FALSE, message=FALSE}
+library(caret)
+my_data <- iris[,3:5]
+inTrain <- createDataPartition(y=my_data$Species, p=0.7, list=F)
+    training <- my_data[inTrain, ]
+    testing <- my_data[-inTrain, ]
+    model2 <- train(Species~., data=training, method="lda")
+    a <- confusionMatrix(testing$Species, predict(model2, testing[,-3]))
+    a$overall
+```
